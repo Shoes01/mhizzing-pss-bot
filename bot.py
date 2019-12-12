@@ -2,11 +2,13 @@
 
 import os
 import discord
+import typing
 from dotenv import load_dotenv
 
 from discord.ext import commands
 
 import market
+import utility
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -32,6 +34,18 @@ async def swap_finder(ctx):
     data = market.pull_min_swaps()
     await ctx.send(data)
 
+@bot.command(name='roll', help='roll a 6-sided dice. To roll different amounts/dice, [p]roll 5d8')
+async def roller(ctx, dice_arg: typing.Optional[str] = '1d6'):
+    dice_arg = dice_arg.lower()
+    dice = dice_arg.split('d')
+    n = int(dice[0])
+    d = int(dice[1])
+    rolls = utility.roll(n, d)
+    await ctx.send(f'You rolled {n} {d}-sided dice. Results:\n' + f'`{str(rolls)[1:-1]}`')
+
+@bot.command(name='binary', help='convert an integer into its binary representation')
+async def int_to_bin(ctx, n: int):
+    await ctx.send(f'{n} in binary is {bin(n)}')
 
 bot.run(TOKEN)
 
