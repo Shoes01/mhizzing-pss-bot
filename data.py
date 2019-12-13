@@ -14,8 +14,8 @@ engines = {
     10 : 0.23
 }
 
-wpn_data_file = os.path.join(os.getcwd(), 'wpn_data.csv')
-
+wpn_data_file = os.path.join(os.getcwd(), 'data/wpn_data.csv')
+print(wpn_data_file) # remove
 with open(wpn_data_file) as file:
     wpn_data = pd.read_csv(file, index_col=0)
 
