@@ -36,20 +36,28 @@ def get_production_server():
 base_url = 'http://{}/'.format(get_production_server())
 
 # ----- Get Market Data -----------------------------------
-def request_market_data():
-    url = base_url + 'MessageService/ListActiveMarketplaceMessages5?currencyType=Mineral&itemDesignId=81&rarity=Common&itemSubType=MineralPack'
+def request_market_data(currencyType, itemDesignId, rarity, itemSubType):
+    url = base_url + f'MessageService/ListActiveMarketplaceMessages5?currencyType={currencyType}&itemDesignId={itemDesignId}&rarity={rarity}&itemSubType={itemSubType}'
     data = urllib.request.urlopen(url).read()
     return data
 
 def pull_min_swaps():
-    df = xmltext_to_df(request_market_data())
-    filtered = df[df['ActivityArgument'] == 'mineral:497000']
-    sliced = filtered[['UserName', 'ActivityArgument']]
-    return sliced.to_string()
+    # Gather 497k swaps for both small mineral and gas crates
+    df1 = xmltext_to_df(request_market_data('Mineral', '81', 'Common', 'MineralPack'))
+    df1['Item'] = 'Small Mineral Crate'
+    df2 = xmltext_to_df(request_market_data('Mineral', '84', 'Common', 'GasPack'))
+    df2['Item'] = 'Small Gas Crate'
+    df = pd.concat([df1, df2])
+
+    # Clean up output
+    df = df.loc[lambda df : df.ActivityArgument == 'mineral:497000']
+    df = df[['UserName', 'Item', 'ActivityArgument']]
+    df.rename(columns={'ActivityArgument': 'Cost'}, inplace=True)
+    df = df.reset_index(drop=True)
+
+    return df
 
 # ----- Main ------
 if __name__ == "__main__":
     df = pull_min_swaps()
-    sliced = df[['UserName', 'ActivityArgument']]
-    print(sliced.to_string())
-
+    print(df)

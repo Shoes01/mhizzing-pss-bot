@@ -10,12 +10,16 @@ from discord.ext import commands
 import market
 import utility
 
+# =========== SETUP ===========================================================
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 COMMAND_PREFIX = '-'
 
 bot= commands.Bot(command_prefix=COMMAND_PREFIX, description='Discord bot intended for use with the PSS Express fleet Discord')
+
+# =========== END SETUP =======================================================
 
 @bot.event
 async def on_ready():
@@ -25,27 +29,62 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})')
 
 @bot.command(name='test', help='Used for bot testing purposes.')
-async def tester_command(ctx):
+async def tester_command(self, ctx):
     response = 'Master, I am functioning as you intended.'
     await ctx.send(response)
 
-@bot.command(name='minswaps', help='Pulls all mineral crates worth 497k off market')
-async def swap_finder(ctx):
-    data = market.pull_min_swaps()
-    await ctx.send(data)
 
-@bot.command(name='roll', help='roll a 6-sided dice. To roll different amounts/dice, [p]roll 5d8')
-async def roller(ctx, dice_arg: typing.Optional[str] = '1d6'):
-    dice_arg = dice_arg.lower()
-    dice = dice_arg.split('d')
-    n = int(dice[0])
-    d = int(dice[1])
-    rolls = utility.roll(n, d)
-    await ctx.send(f'You rolled {n} {d}-sided dice. Results:\n' + f'`{str(rolls)[1:-1]}`')
+class PSS(commands.Cog, name = 'PSS Commands'):
+    def __init__(self, bot):
+        self.bot = bot
 
-@bot.command(name='binary', help='convert an integer into its binary representation')
-async def int_to_bin(ctx, n: int):
-    await ctx.send(f'{n} in binary is {bin(n)}')
+    @commands.command(name='minswaps', help='Pulls all crates worth 497k off market')
+    @commands.has_any_role('Planet·Express', 'Awesome·Express')
+    async def swap_finder(self, ctx):
+        data = market.pull_min_swaps()
+        await ctx.send(f'```{data}```')
 
-bot.run(TOKEN)
+    @commands.command(name='engine', help='Calculates engine dodge rate. ')
+    async def eng_dodge(self, ctx, e_lvl : int = 10, e_stat : float = 0.0):
+        await ctx.send(f'Engine Lv{e_lvl} with {e_stat} ENG stat: {utility.dodge_rate(e_lvl, e_stat)}% dodge rate')
 
+    @commands.command(name='allwpns', help='Lists all weapon strings for use with dps function')
+    async def list_all_wpnstrings(self, ctx):
+        await ctx.send(f'```{utility.allwpns()}```')
+
+    @commands.command(name='dps', help='Gets DPS for a weapon, can add WPN stat and power.')
+    async def dps_calculator(self, ctx, wpn_string, wpn_stat : typing.Optional[float] = 0.0, power : typing.Optional[int] = 'MAX'):
+        await ctx.send(utility.dps(wpn_string, wpn_stat, power))
+
+    @commands.command(name='tax', help='Determines the amount of tax when you sell an item for a certain price. ')
+    async def tax_calculator(self, ctx, sell_price : int):
+        if sell_price == 1:
+            amount = 1
+        else:
+            amount = utility.truncate(sell_price*0.8)
+
+        await ctx.send(f'After tax: {amount}')
+
+
+class Fun(commands.Cog, name = 'Fun Commands'):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(name='roll', help=f'Roll a 6-sided dice. To customise: {COMMAND_PREFIX}roll 3d8')
+    async def roller(self, ctx, dice_arg: typing.Optional[str] = '1d6'):
+        dice_arg = dice_arg.lower()
+        dice = dice_arg.split('d')
+        n = int(dice[0])
+        d = int(dice[1])
+        rolls = utility.roll(n, d)
+        await ctx.send(f'__You rolled {n} {d}-sided dice.__ Results:\n' + f'`{str(rolls)[1:-1]}`')
+
+    @commands.command(name='binary', help='Convert an integer into its binary representation')
+    async def int_to_bin(self, ctx, n: int):
+        await ctx.send(f'{n} in binary is __{bin(n)[2:]}__.')
+
+
+if __name__ == "__main__":
+    bot.add_cog(PSS(bot))
+    bot.add_cog(Fun(bot))
+    bot.run(TOKEN)
