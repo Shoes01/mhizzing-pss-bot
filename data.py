@@ -13,7 +13,7 @@ engines = {
     10 : 0.23
 }
 
-wpn_data = pd.read_csv('PSS DPS Calc - DATA2.csv', index_col=0)
+wpn_data = pd.read_csv('wpn_data.csv', index_col=0)
 
 if __name__ == "__main__":
     wpn = wpn_data.loc['MLZ15']
