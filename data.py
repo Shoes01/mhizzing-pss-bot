@@ -15,7 +15,9 @@ engines = {
 }
 
 wpn_data_file = os.path.join(os.getcwd(), 'wpn_data.csv')
-wpn_data = pd.read_csv(wpn_data_file, index_col=0)
+
+with open(wpn_data_file) as file:
+    wpn_data = pd.read_csv(file, index_col=0)
 
 if __name__ == "__main__":
     wpn = wpn_data.loc['MLZ15']
