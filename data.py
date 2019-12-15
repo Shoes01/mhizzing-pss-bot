@@ -20,9 +20,5 @@ with open(wpn_data_file) as file:
     wpn_data = pd.read_csv(file, index_col=0)
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     path = pathlib.Path.cwd()
     print(path.anchor)
-=======
-    print(Path.cwd() / 'data' / 'wpn_data.csv')
->>>>>>> 4682e9a5ccc1fe753e4bf8956de98e15c7e213cd
