@@ -29,9 +29,16 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})')
 
 @bot.command(name='test', help='Used for bot testing purposes.')
-async def tester_command(self, ctx):
+async def tester_command(ctx):
     response = 'Master, I am functioning as you intended.'
     await ctx.send(response)
+
+@bot.command(name = 'xmas_role', help='Add role to let you write christmas story')
+async def add_xmas_role(ctx):
+    user = ctx.message.author
+    role = discord.utils.get(user.guild.roles, name="Christmas Story Writer")
+    await user.add_roles(role)
+    await ctx.send(f'{user} may now write in the xmas story channel.')
 
 
 class PSS(commands.Cog, name = 'PSS Commands'):
