@@ -1,5 +1,5 @@
 import pandas as pd
-from pathlib import Path
+import pathlib
 
 engines = {
     1 : 0.08,
@@ -14,10 +14,11 @@ engines = {
     10 : 0.23
 }
 
-wpn_data_file = Path.cwd() / 'data' / 'wpn_data.csv'
+wpn_data_file = pathlib.Path.cwd() / 'data' / 'wpn_data.csv'
 
 with open(wpn_data_file) as file:
     wpn_data = pd.read_csv(file, index_col=0)
 
 if __name__ == "__main__":
-    print(Path.cwd() / 'data' / 'wpn_data.csv')
+    path = pathlib.Path.cwd()
+    print(path.anchor)

@@ -52,9 +52,9 @@ class PSS(commands.Cog, name = 'PSS Commands'):
     async def list_all_wpnstrings(self, ctx):
         await ctx.send(f'```{utility.allwpns()}```')
 
-    @commands.command(name='dps', help='Gets DPS for a weapon, can add WPN stat and power.')
-    async def dps_calculator(self, ctx, wpn_string, wpn_stat : typing.Optional[float] = 0.0, power : typing.Optional[int] = 'MAX'):
-        await ctx.send(utility.dps(wpn_string, wpn_stat, power))
+    @commands.command(name='dps', help='Gets DPS for a weapon, see -help dps for wpn lvl, room stat & power options.')
+    async def dps_calculator(self, ctx, wpn_string, stat : float = 0.0, power : int = 'MAX'): # TODO: Add a way to allow arguments to be passed via command in any order(*args?)
+        await ctx.send(utility.dps(wpn_string = wpn_string, wpn_stat=stat , power=power))
 
     @commands.command(name='tax', help='Determines the amount of tax when you sell an item for a certain price. ')
     async def tax_calculator(self, ctx, sell_price : int):

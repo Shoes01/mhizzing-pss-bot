@@ -40,7 +40,7 @@ def dps(wpn_string, wpn_stat=0.0, power='MAX'):
     hull_dps = round(wpn['HULL_DMG']/cycle, 3)
     ap_dps = round(wpn['AP_DMG']/cycle, 3)
 
-    return f'**DPS values for {wpn_string} with {wpn_stat}WPN and {power} power:**\n```{sys_dps} System DPS\n{crew_dps} Crew DPS\n{shl_dps} Shield DPS\n{hull_dps} Direct Hull DPS\n{ap_dps} AP DPS```'
+    return f'**DPS values for {wpn_string} with {wpn_stat}Room Stat and {power} power:**\n```{sys_dps} System DPS\n{crew_dps} Crew DPS\n{shl_dps} Shield DPS\n{hull_dps} Direct Hull DPS\n{ap_dps} AP DPS```'
 
 if __name__ == "__main__":
     print(dodge_rate(8, 50))
