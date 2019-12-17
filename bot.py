@@ -83,10 +83,12 @@ class Fun(commands.Cog, name = 'Fun Commands'):
         dice_values = dice_arg.split('d')
         n = int(dice_values[0])
         d = int(dice_values[1])
-        if n > 100000 or d > 100000:
+        if n < 1000 and d < 1000000:
+            rolls = utility.roll(n, d)
+            await ctx.send(f'__You rolled {n} {d}-sided dice.__ Results:\n' + f'`{str(rolls)[1:-1]}`')
+        else:
             await ctx.send('I would rather die than roll that many dice for you.')
-        rolls = utility.roll(n, d)
-        await ctx.send(f'__You rolled {n} {d}-sided dice.__ Results:\n' + f'`{str(rolls)[1:-1]}`')
+        
 
     @commands.command(name='binary', help='Convert an integer into its binary representation')
     async def int_to_bin(self, ctx, n: int):
