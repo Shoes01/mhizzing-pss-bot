@@ -81,6 +81,8 @@ class Fun(commands.Cog, name = 'Fun Commands'):
     async def roller(self, ctx, dice_arg: typing.Optional[str] = '1d6'):
         dice_arg = dice_arg.lower()
         dice = dice_arg.split('d')
+        if dice > 100000 or dice_arg > 100000:
+            await ctx.send('I would rather die than roll that many dice for you.')
         n = int(dice[0])
         d = int(dice[1])
         rolls = utility.roll(n, d)
