@@ -9,6 +9,7 @@ from discord.ext import commands
 
 import market
 import utility
+import dictionary
 
 # =========== SETUP ===========================================================
 
@@ -16,6 +17,9 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 COMMAND_PREFIX = '-'
+
+cmd_rate = 20
+cmd_per = 10
 
 bot= commands.Bot(command_prefix=COMMAND_PREFIX, description='Discord bot intended for use with the PSS Express fleet Discord')
 
@@ -77,7 +81,26 @@ class Fun(commands.Cog, name = 'Fun Commands'):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        """Triggers on error within cog"""
+
+        # Prevent local handled commands from being handled here
+        if hasattr(ctx.command, 'on_error'):
+            return
+    
+        ignored = (commands.CommandNotFound, commands.UserInputError) # Already handled
+        error = getattr(error, 'original', error)
+        
+        if isinstance(error, ignored):
+            return
+
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(error)
+
+
     @commands.command(name='roll', help=f'Roll a 6-sided dice. To customise: {COMMAND_PREFIX}roll 3d8')
+    @commands.cooldown(rate=cmd_rate, per=cmd_per, type=commands.BucketType.member)
     async def roller(self, ctx, dice_arg: typing.Optional[str] = '1d6'):
         dice_arg = dice_arg.lower()
         dice_values = dice_arg.split('d')
@@ -94,6 +117,10 @@ class Fun(commands.Cog, name = 'Fun Commands'):
     async def int_to_bin(self, ctx, n: int):
         await ctx.send(f'{n} in binary is __{bin(n)[2:]}__.')
 
+    @commands.command(name='define', help='Returns definition for a word')
+    async def define_word(self, ctx, word):
+        result = utility.dict_api(word)
+        await ctx.send(result)
 
 if __name__ == "__main__":
     bot.add_cog(PSS(bot))
