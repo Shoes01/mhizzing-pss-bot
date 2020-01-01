@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 
 from discord.ext import commands
 
+import bank
 import market
 import utility
-import dictionary
 
 # =========== SETUP ===========================================================
 
@@ -17,6 +17,8 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 COMMAND_PREFIX = '-'
+ADMIN_ROLE = 'Administrator'
+
 
 cmd_rate = 20
 cmd_per = 10
@@ -34,22 +36,15 @@ async def on_ready():
 
 @bot.command(name='test', help='Used for bot testing purposes.')
 async def tester_command(ctx):
-    response = 'Master, I am functioning as you intended.'
+    response = f'Master {ctx.author}, I am functioning as you intended.'
     await ctx.send(response)
-
-@bot.command(name = 'xmas_role', help='Add role to let you write christmas story')
-async def add_xmas_role(ctx):
-    user = ctx.message.author
-    role = discord.utils.get(user.guild.roles, name="Christmas Story Writer")
-    await user.add_roles(role)
-    await ctx.send(f'{user} may now write in the xmas story channel.')
 
 
 class PSS(commands.Cog, name = 'PSS Commands'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='minswaps', help='Pulls all crates worth 497k off market')
+    @commands.command(name='minswaps', help='Pulls all crates worth 497k off market', aliases=['ms'])
     @commands.has_any_role('Planet·Express', 'Awesome·Express')
     async def swap_finder(self, ctx):
         data = market.pull_min_swaps()
@@ -76,6 +71,54 @@ class PSS(commands.Cog, name = 'PSS Commands'):
 
         await ctx.send(f'After tax: {amount}')
 
+
+class Bank(commands.Cog, name = 'Bank Commands'):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.group(name='bank', invoke_without_command=True, help='Various commands involving the Express fleet rewards bank')
+    async def bank(self, ctx):
+        await ctx.send(f"Base bank command. Use {COMMAND_PREFIX}help bank to see subcommands.")
+
+    @bank.command(name='new', help='Create new bank account with a set balance')
+    @commands.has_role(ADMIN_ROLE)
+    async def bankaccount_update(self, ctx, acc_name: str, acc_balance: int):
+        result = bank.bank_update_account(acc_name, acc_balance)
+        await ctx.send(result)
+
+    @bank.command(name='add', help='Add/subtract an amount from a bank account')
+    @commands.has_role(ADMIN_ROLE)
+    async def bank_account_add(self, ctx, acc_name: str, amount: int):
+        if bank.bank_inc_balance(acc_name, amount):
+            if amount < 0:
+                await ctx.send(f'{acc_name}\'s balance decreased by {-amount}.')
+            else:
+                await ctx.send(f'{acc_name}\'s balance increased by {amount}.')
+        else:
+            await ctx.send('Account modification failed.')
+                
+
+    @bank.command(name = 'wallet', help='Check your bank balance')
+    async def bank_check(self, ctx):
+        author = str(ctx.author)
+        balance = bank.bank_check_balance(author)
+        if balance:
+            await ctx.send(f'{ctx.author}, your balance is {balance}.')
+        else:
+            await ctx.send('This account doesn\'t exist')
+
+    @bank.command(name='all', help='Show all bank accounts')
+    async def bank_showall(self, ctx):
+        accounts = bank.bank_all_accounts()
+        await ctx.send(accounts)
+
+    @bank.command(name='delete', help='Deletes a bank account')
+    @commands.has_role(ADMIN_ROLE)
+    async def bank_delete(self, ctx, acc_name: str):
+        if bank.bank_delete_account(acc_name):
+            await ctx.send(f'{acc_name}\'s bank account deleted successfully.')
+        else:
+            await ctx.send('Could not delete that account.')
 
 class Fun(commands.Cog, name = 'Fun Commands'):
     def __init__(self, bot):
@@ -125,4 +168,5 @@ class Fun(commands.Cog, name = 'Fun Commands'):
 if __name__ == "__main__":
     bot.add_cog(PSS(bot))
     bot.add_cog(Fun(bot))
+    bot.add_cog(Bank(bot))
     bot.run(TOKEN)
