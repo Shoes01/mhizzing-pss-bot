@@ -19,7 +19,6 @@ GUILD = os.getenv('DISCORD_GUILD')
 COMMAND_PREFIX = '-'
 ADMIN_ROLE = 'Administrator'
 
-
 cmd_rate = 20
 cmd_per = 10
 
@@ -44,16 +43,6 @@ class PSS(commands.Cog, name = 'PSS Commands'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='minswaps', help='Pulls all crates worth 497k off market', aliases=['ms'])
-    @commands.has_any_role('Planet·Express', 'Awesome·Express')
-    async def swap_finder(self, ctx):
-        data = market.pull_min_swaps()
-        await ctx.send(f'```{data}```')
-
-    @commands.command(name='engine', help='Calculates engine dodge rate. ')
-    async def eng_dodge(self, ctx, e_lvl : int = 10, e_stat : float = 0.0):
-        await ctx.send(f'Engine Lv{e_lvl} with {e_stat} ENG stat: {utility.dodge_rate(e_lvl, e_stat)}% dodge rate')
-
     @commands.command(name='allwpns', help='Lists all weapon strings for use with dps function')
     async def list_all_wpnstrings(self, ctx):
         await ctx.send(f'```{utility.allwpns()}```')
@@ -61,6 +50,25 @@ class PSS(commands.Cog, name = 'PSS Commands'):
     @commands.command(name='dps', help='Gets DPS for a weapon, see -help dps for wpn lvl, room stat & power options.')
     async def dps_calculator(self, ctx, wpn_string, stat : float = 0.0, power : int = 'MAX'): # TODO: Add a way to allow arguments to be passed via command in any order(*args?)
         await ctx.send(utility.dps(wpn_string = wpn_string, wpn_stat=stat , power=power))
+
+    @commands.command(name='stardust', help='Gets cheapest items of a certain rarity')
+    @commands.has_any_role(401936595294617600, 401936664487919616)
+    @commands.cooldown(rate=1, per=10)
+    async def item_rarity_finder(self, ctx, rarity: str):
+        rarity = rarity.capitalize()
+        await ctx.send('Please wait while I analyse the market...')
+        data = market.pull_rarity(rarity)
+        await ctx.send(f'```{data}```')
+
+    @commands.command(name='engine', help='Calculates engine dodge rate. ')
+    async def eng_dodge(self, ctx, e_lvl : int = 10, e_stat : float = 0.0):
+        await ctx.send(f'Engine Lv{e_lvl} with {e_stat} ENG stat: {utility.dodge_rate(e_lvl, e_stat)}% dodge rate')
+
+    @commands.command(name='minswaps', help='Pulls all crates worth 497k off market', aliases=['ms'])
+    @commands.has_any_role(401936595294617600, 401936664487919616)
+    async def swap_finder(self, ctx):
+        data = market.pull_min_swaps()
+        await ctx.send(f'```{data}```')
 
     @commands.command(name='tax', help='Determines the amount of tax when you sell an item for a certain price. ')
     async def tax_calculator(self, ctx, sell_price : int):
