@@ -90,6 +90,11 @@ def pull_rarity(rarity):
     all_items = pd.concat([cheap_bux_items, final_df[final_df.Currency == 'minerals'], final_df[final_df.Currency == 'gas']])
     return all_items
 
+def shoes_function():
+    # Here is where I will ask the market for clamps, guitars, other engineering items, etc.
+    df_list =  []
+    return 0
+
 # ----- Main ------
 if __name__ == "__main__":
     df1 = pull_rarity('Unique')
