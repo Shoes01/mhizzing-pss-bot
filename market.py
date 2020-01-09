@@ -79,12 +79,14 @@ def pull_rarity(rarity):
     for subtype in equip_subtypes:
         df_list.append(xmltext_to_df(request_market_data2(subtype, rarity)))
     big_df = pd.concat(df_list)
-    big_df = big_df[['UserName', 'Message', 'ActivityArgument']].reset_index()
+    big_df = big_df[['Message', 'ActivityArgument']].reset_index()
     split_cols = pd.DataFrame(big_df.ActivityArgument.str.split(':', 1).tolist(), columns=['Currency', 'Price'])
-    final_df = pd.concat([big_df[['UserName', 'Message']], split_cols], axis=1)
+    split_cols['Price'] = pd.to_numeric(split_cols['Price'])
+
+    final_df = pd.concat([big_df['Message'], split_cols], axis=1)
 
     # Sort data to get cheapest items
-    cheap_bux_items = final_df[final_df.Currency == 'starbux'].sort_values(by=['Price'], ascending=False)[:5]
+    cheap_bux_items = final_df[final_df.Currency == 'starbux'].sort_values(by=['Price'])[:5]
     all_items = pd.concat([cheap_bux_items, final_df[final_df.Currency == 'minerals'], final_df[final_df.Currency == 'gas']])
     return all_items
 
